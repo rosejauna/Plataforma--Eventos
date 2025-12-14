@@ -30,12 +30,20 @@ export default function Eventos() {
   const [search, setSearch] = useState("");
   const [form] = Form.useForm();
 
+  // Carrega eventos
   async function load() {
     setLoading(true);
     try {
       const ev = await eventDAO.findAll();
-      setEvents(ev || []);
+      // Garante que ingressos e participantes existam
+      const normalized = (ev || []).map(e => ({
+        ...e,
+        ingressos: e.ingressos || [],
+        participantes: e.participantes || []
+      }));
+      setEvents(normalized);
     } catch (err) {
+      console.error(err);
       message.error("Erro ao carregar eventos");
     } finally {
       setLoading(false);
@@ -46,12 +54,14 @@ export default function Eventos() {
     load();
   }, []);
 
+  // Abrir modal de novo evento
   function onAdd() {
     setEdit(null);
     form.resetFields();
     setModalOpen(true);
   }
 
+  // Editar evento
   function onEdit(r) {
     setEdit(r);
     form.setFieldsValue({
@@ -61,6 +71,7 @@ export default function Eventos() {
     setModalOpen(true);
   }
 
+  // Salvar evento
   async function onSubmit(values) {
     const payload = {
       ...values,
@@ -77,14 +88,16 @@ export default function Eventos() {
       }
       setModalOpen(false);
       load();
-    } catch {
+    } catch (err) {
+      console.error(err);
       message.error("Erro ao salvar evento");
     }
   }
 
+  // Deletar evento
   async function onDelete(r) {
     Modal.confirm({
-      title: "Tem certeza que deseja excluir?",
+      title: "Tem certeza que deseja excluir este evento?",
       okText: "Sim",
       okType: "danger",
       cancelText: "Cancelar",
@@ -93,24 +106,24 @@ export default function Eventos() {
           await eventDAO.delete(r._id || r.id);
           message.success("Evento removido");
           load();
-        } catch {
+        } catch (err) {
+          console.error(err);
           message.error("Erro ao remover evento");
         }
       }
     });
   }
 
+  // Abrir modal de participantes
   function manageParticipants(r) {
     setSelectedEventId(r._id || r.id);
     setParticipantsModalOpen(true);
   }
 
-  // 🔍 FILTRO FUNCIONAL
+  // Filtrar eventos por busca
   const filteredEvents = useMemo(() => {
     if (!search) return events;
-
     const s = search.toLowerCase();
-
     return events.filter(e =>
       e.nome?.toLowerCase().includes(s) ||
       e.local?.toLowerCase().includes(s) ||
@@ -119,17 +132,30 @@ export default function Eventos() {
     );
   }, [events, search]);
 
+  // Colunas da tabela
   const columns = [
-    { title: "Nome", dataIndex: "nome" },
-    { title: "Local", dataIndex: "local" },
-    { title: "Capacidade", dataIndex: "capacidade" },
+    { title: "Nome", dataIndex: "nome", key: "nome" },
+    { title: "Local", dataIndex: "local", key: "local" },
+    { title: "Capacidade", dataIndex: "capacidade", key: "capacidade" },
     {
       title: "Data",
       dataIndex: "data",
+      key: "data",
       render: d => (d ? dayjs(d).format("DD/MM/YYYY") : "")
     },
     {
+      title: "Participantes",
+      key: "participantes",
+      render: (_, r) => r.participantes?.length || 0
+    },
+    {
+      title: "Ingressos",
+      key: "ingressos",
+      render: (_, r) => r.ingressos?.length || 0
+    },
+    {
       title: "Ações",
+      key: "acoes",
       render: (_, r) => (
         <div style={{ display: "flex", gap: 12, fontSize: 18 }}>
           <EditOutlined
@@ -191,7 +217,7 @@ export default function Eventos() {
           <Form.Item
             name="nome"
             label="Nome do Evento"
-            rules={[{ required: true }]}
+            rules={[{ required: true, message: "Informe o nome do evento" }]}
           >
             <Input />
           </Form.Item>
@@ -199,7 +225,7 @@ export default function Eventos() {
           <Form.Item
             name="local"
             label="Local"
-            rules={[{ required: true }]}
+            rules={[{ required: true, message: "Informe o local" }]}
           >
             <Input />
           </Form.Item>
@@ -207,7 +233,7 @@ export default function Eventos() {
           <Form.Item
             name="capacidade"
             label="Capacidade"
-            rules={[{ required: true }]}
+            rules={[{ required: true, message: "Informe a capacidade" }]}
           >
             <InputNumber style={{ width: "100%" }} />
           </Form.Item>
@@ -215,7 +241,7 @@ export default function Eventos() {
           <Form.Item
             name="data"
             label="Data"
-            rules={[{ required: true }]}
+            rules={[{ required: true, message: "Informe a data" }]}
           >
             <DatePicker style={{ width: "100%" }} />
           </Form.Item>
