@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import {
   Button,
   Table,
@@ -7,8 +7,7 @@ import {
   Input,
   InputNumber,
   DatePicker,
-  message,
-  Space
+  message
 } from "antd";
 import {
   PlusOutlined,
@@ -28,13 +27,19 @@ export default function Eventos() {
   const [modalOpen, setModalOpen] = useState(false);
   const [participantsModalOpen, setParticipantsModalOpen] = useState(false);
   const [selectedEventId, setSelectedEventId] = useState(null);
+  const [search, setSearch] = useState("");
   const [form] = Form.useForm();
 
   async function load() {
     setLoading(true);
-    const ev = await eventDAO.findAll();
-    setEvents(ev || []);
-    setLoading(false);
+    try {
+      const ev = await eventDAO.findAll();
+      setEvents(ev || []);
+    } catch (err) {
+      message.error("Erro ao carregar eventos");
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
@@ -72,7 +77,7 @@ export default function Eventos() {
       }
       setModalOpen(false);
       load();
-    } catch (error) {
+    } catch {
       message.error("Erro ao salvar evento");
     }
   }
@@ -84,9 +89,13 @@ export default function Eventos() {
       okType: "danger",
       cancelText: "Cancelar",
       onOk: async () => {
-        await eventDAO.delete(r._id || r.id);
-        message.success("Evento removido");
-        load();
+        try {
+          await eventDAO.delete(r._id || r.id);
+          message.success("Evento removido");
+          load();
+        } catch {
+          message.error("Erro ao remover evento");
+        }
       }
     });
   }
@@ -95,6 +104,20 @@ export default function Eventos() {
     setSelectedEventId(r._id || r.id);
     setParticipantsModalOpen(true);
   }
+
+  // 🔍 FILTRO FUNCIONAL
+  const filteredEvents = useMemo(() => {
+    if (!search) return events;
+
+    const s = search.toLowerCase();
+
+    return events.filter(e =>
+      e.nome?.toLowerCase().includes(s) ||
+      e.local?.toLowerCase().includes(s) ||
+      (e.data && dayjs(e.data).format("DD/MM/YYYY").includes(s)) ||
+      String(e.capacidade).includes(s)
+    );
+  }, [events, search]);
 
   const columns = [
     { title: "Nome", dataIndex: "nome" },
@@ -106,27 +129,24 @@ export default function Eventos() {
       render: d => (d ? dayjs(d).format("DD/MM/YYYY") : "")
     },
     {
-  title: "Ações",
-  render: (_, r) => (
-    <div style={{ display: "flex", gap: 12, fontSize: 18 }}>
-      <EditOutlined
-        style={{ cursor: "pointer", color: "#1677ff" }}
-        onClick={() => onEdit(r)}
-      />
-
-      <DeleteOutlined
-        style={{ cursor: "pointer", color: "red" }}
-        onClick={() => onDelete(r)}
-      />
-
-      <TeamOutlined
-        style={{ cursor: "pointer", color: "#52c41a" }}
-        onClick={() => manageParticipants(r)}
-      />
-    </div>
-  )
-}
-
+      title: "Ações",
+      render: (_, r) => (
+        <div style={{ display: "flex", gap: 12, fontSize: 18 }}>
+          <EditOutlined
+            style={{ cursor: "pointer", color: "#1677ff" }}
+            onClick={() => onEdit(r)}
+          />
+          <DeleteOutlined
+            style={{ cursor: "pointer", color: "red" }}
+            onClick={() => onDelete(r)}
+          />
+          <TeamOutlined
+            style={{ cursor: "pointer", color: "#52c41a" }}
+            onClick={() => manageParticipants(r)}
+          />
+        </div>
+      )
+    }
   ];
 
   return (
@@ -141,22 +161,20 @@ export default function Eventos() {
         }}
       >
         <Input.Search
-          placeholder="Pesquisar..."
-          style={{ width: 300, maxWidth: "100%" }}
-          onSearch={() => {}}
+          placeholder="Pesquisar por nome, local, data ou capacidade"
+          allowClear
+          style={{ width: 320, maxWidth: "100%" }}
+          value={search}
+          onChange={e => setSearch(e.target.value)}
         />
 
-        <Button
-          type="primary"
-          icon={<PlusOutlined />}
-          onClick={onAdd}
-        >
+        <Button type="primary" icon={<PlusOutlined />} onClick={onAdd}>
           Novo Evento
         </Button>
       </div>
 
       <Table
-        dataSource={events}
+        dataSource={filteredEvents}
         columns={columns}
         rowKey={r => r._id || r.id}
         loading={loading}
@@ -167,6 +185,7 @@ export default function Eventos() {
         title={edit ? "Editar Evento" : "Novo Evento"}
         onCancel={() => setModalOpen(false)}
         onOk={() => form.submit()}
+        destroyOnClose
       >
         <Form form={form} layout="vertical" onFinish={onSubmit}>
           <Form.Item
