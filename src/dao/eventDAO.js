@@ -3,7 +3,7 @@ import api from "../api/api";
 export default {
   async findAll() {
     const res = await api.get("/eventos");
-    return res.data || [];
+    return res.data;
   },
 
   async findById(id) {
@@ -24,5 +24,15 @@ export default {
   async delete(id) {
     const res = await api.delete(`/eventos/${id}`);
     return res.data;
-  }
+  },
+
+  async addParticipant(eventId, participantId) {
+    const res = await api.post(`/eventos/${eventId}/participantes`, { participantId });
+    return res.data;
+  },
+
+  async removeParticipant(eventId, participantId) {
+    const res = await api.delete(`/eventos/${eventId}/participantes/${participantId}`);
+    return res.data;
+  },
 };
