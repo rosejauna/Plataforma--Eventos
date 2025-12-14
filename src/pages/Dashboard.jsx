@@ -29,14 +29,16 @@ export default function Dashboard() {
 
   const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
 
+  // Pie chart - participantes por evento
   const pieData = summary.eventos.map((e) => ({
     name: e.nome,
-    value: e.participantes?.length ?? 0,
+    value: e.participantesCount || 0,
   }));
 
+  // Bar chart - ingressos por evento
   const barData = summary.eventos.map((e) => ({
     nome: e.nome,
-    ingressos: e.ingressos?.length ?? e.totalIngressos ?? 0,
+    ingressos: e.ingressosCount || 0,
   }));
 
   const columns = [
@@ -50,34 +52,17 @@ export default function Dashboard() {
     },
     {
       title: "Status",
-      dataIndex: "data",
+      dataIndex: "status",
       key: "status",
-      render: (d) => {
-        if (!d) return "";
-        const eventDate = new Date(d);
-        const now = new Date();
-        return eventDate > now ? (
-          <Tag color="green">Ainda vai acontecer</Tag>
-        ) : (
-          <Tag color="red">Já aconteceu</Tag>
-        );
-      },
+      render: (s) =>
+        s === "futuro" ? <Tag color="green">Ainda vai acontecer</Tag> : <Tag color="red">Já aconteceu</Tag>,
     },
-    {
-      title: "Total Ingressos",
-      dataIndex: "ingressos",
-      key: "ingressos",
-      render: (_, r) => r.ingressos?.length ?? r.totalIngressos ?? 0,
-    },
-    {
-      title: "Participantes",
-      dataIndex: "participantes",
-      key: "participantes",
-      render: (_, r) => r.participantes?.length ?? 0,
-    },
+    { title: "Total Ingressos", dataIndex: "ingressosCount", key: "ingressosCount" },
+    { title: "Participantes", dataIndex: "participantesCount", key: "participantesCount" },
   ];
 
-  if (loading) return <Spin size="large" style={{ display: "block", margin: "100px auto" }} />;
+  if (loading)
+    return <Spin size="large" style={{ display: "block", margin: "100px auto" }} />;
 
   return (
     <div style={{ padding: 24 }}>
@@ -133,7 +118,12 @@ export default function Dashboard() {
       </Row>
 
       <Card title="Últimos Eventos" style={{ marginTop: 24 }}>
-        <Table columns={columns} dataSource={summary.eventos} rowKey="_id" pagination={{ pageSize: 5 }} />
+        <Table
+          columns={columns}
+          dataSource={summary.eventos}
+          rowKey="_id"
+          pagination={{ pageSize: 5 }}
+        />
       </Card>
     </div>
   );
