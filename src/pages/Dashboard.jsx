@@ -1,4 +1,3 @@
-// src/pages/Dashboard.jsx
 import React, { useEffect, useState } from "react";
 import { Card, Row, Col, Table, Tag, Spin } from "antd";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
@@ -29,13 +28,13 @@ export default function Dashboard() {
 
   const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
 
-  // Pie chart - participantes por evento
+  // Gráfico de pizza usando participantesCount
   const pieData = summary.eventos.map((e) => ({
     name: e.nome,
     value: e.participantesCount || 0,
   }));
 
-  // Bar chart - ingressos por evento
+  // Gráfico de barras usando ingressosCount
   const barData = summary.eventos.map((e) => ({
     nome: e.nome,
     ingressos: e.ingressosCount || 0,
@@ -57,12 +56,21 @@ export default function Dashboard() {
       render: (s) =>
         s === "futuro" ? <Tag color="green">Ainda vai acontecer</Tag> : <Tag color="red">Já aconteceu</Tag>,
     },
-    { title: "Total Ingressos", dataIndex: "ingressosCount", key: "ingressosCount" },
-    { title: "Participantes", dataIndex: "participantesCount", key: "participantesCount" },
+    {
+      title: "Total Ingressos",
+      dataIndex: "ingressosCount",
+      key: "ingressosCount",
+      render: (_, r) => r.ingressosCount || 0,
+    },
+    {
+      title: "Participantes",
+      dataIndex: "participantesCount",
+      key: "participantesCount",
+      render: (_, r) => r.participantesCount || 0,
+    },
   ];
 
-  if (loading)
-    return <Spin size="large" style={{ display: "block", margin: "100px auto" }} />;
+  if (loading) return <Spin size="large" style={{ display: "block", margin: "100px auto" }} />;
 
   return (
     <div style={{ padding: 24 }}>
@@ -118,12 +126,7 @@ export default function Dashboard() {
       </Row>
 
       <Card title="Últimos Eventos" style={{ marginTop: 24 }}>
-        <Table
-          columns={columns}
-          dataSource={summary.eventos}
-          rowKey="_id"
-          pagination={{ pageSize: 5 }}
-        />
+        <Table columns={columns} dataSource={summary.eventos} rowKey="_id" pagination={{ pageSize: 5 }} />
       </Card>
     </div>
   );
