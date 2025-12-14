@@ -31,12 +31,12 @@ export default function Dashboard() {
 
   const pieData = summary.eventos.map((e) => ({
     name: e.nome,
-    value: e.participantes?.length || 0,
+    value: e.participantes?.length ?? 0,
   }));
 
   const barData = summary.eventos.map((e) => ({
     nome: e.nome,
-    ingressos: e.ingressos?.length || 0,
+    ingressos: e.ingressos?.length ?? e.totalIngressos ?? 0,
   }));
 
   const columns = [
@@ -50,13 +50,31 @@ export default function Dashboard() {
     },
     {
       title: "Status",
-      dataIndex: "status",
+      dataIndex: "data",
       key: "status",
-      render: (s) =>
-        s === "futuro" ? <Tag color="green">Ainda vai acontecer</Tag> : <Tag color="red">Já aconteceu</Tag>,
+      render: (d) => {
+        if (!d) return "";
+        const eventDate = new Date(d);
+        const now = new Date();
+        return eventDate > now ? (
+          <Tag color="green">Ainda vai acontecer</Tag>
+        ) : (
+          <Tag color="red">Já aconteceu</Tag>
+        );
+      },
     },
-    { title: "Total Ingressos", dataIndex: "ingressos", key: "ingressos", render: (_, r) => r.ingressos?.length || 0 },
-    { title: "Participantes", dataIndex: "participantes", key: "participantes", render: (_, r) => r.participantes?.length || 0 },
+    {
+      title: "Total Ingressos",
+      dataIndex: "ingressos",
+      key: "ingressos",
+      render: (_, r) => r.ingressos?.length ?? r.totalIngressos ?? 0,
+    },
+    {
+      title: "Participantes",
+      dataIndex: "participantes",
+      key: "participantes",
+      render: (_, r) => r.participantes?.length ?? 0,
+    },
   ];
 
   if (loading) return <Spin size="large" style={{ display: "block", margin: "100px auto" }} />;
