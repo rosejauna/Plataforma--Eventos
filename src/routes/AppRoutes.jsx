@@ -12,6 +12,7 @@ import Relatorios from "../pages/Relatorios";
 import Configuracoes from "../pages/Configuracoes";
 import PrivateRoute from "../auth/PrivateRoute";
 import AdminRoute from "../auth/AdminRoute";
+import Administradores from "./pages/Administradores";
 
 export default function AppRoutes() {
   return (
@@ -27,6 +28,7 @@ export default function AppRoutes() {
         <Route path="comprar" element={<ComprarIngresso />} />
         <Route path="relatorios" element={<AdminRoute><Relatorios /></AdminRoute>} />
         <Route path="configuracoes" element={<Configuracoes/>} /> {/* make sure import name */}
+        <Route path="/admins" element={<Administradores />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />
