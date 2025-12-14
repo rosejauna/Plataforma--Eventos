@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Table, Button, Modal, Form, Input, message, Popconfirm } from "antd";
 import { PlusOutlined, DeleteOutlined } from "@ant-design/icons";
-import api from "../api/api";
+import api from "../api/api"; // Certifique-se de que o baseURL aponta para /api
+import BasePage from "../components/BasePage"; // Layout padrão, opcional
 
 export default function Administradores() {
   const [admins, setAdmins] = useState([]);
@@ -71,16 +72,16 @@ export default function Administradores() {
   ];
 
   return (
-    <div>
-      <h2>Administradores</h2>
-      <Button
-        type="primary"
-        icon={<PlusOutlined />}
-        style={{ marginBottom: 16 }}
-        onClick={() => setModalOpen(true)}
-      >
-        Novo Administrador
-      </Button>
+    <BasePage title="Administradores">
+      <div style={{ marginBottom: 16 }}>
+        <Button
+          type="primary"
+          icon={<PlusOutlined />}
+          onClick={() => setModalOpen(true)}
+        >
+          Novo Administrador
+        </Button>
+      </div>
 
       <Table
         dataSource={admins}
@@ -124,6 +125,6 @@ export default function Administradores() {
           </Form.Item>
         </Form>
       </Modal>
-    </div>
+    </BasePage>
   );
 }
