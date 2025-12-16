@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { Form, Input, Button, DatePicker, message } from "antd";
 import dayjs from "dayjs";
-import api from "../services/api";
+import api from "../api/api";
 
 export default function EditarEvento({ evento, onClose, onUpdated }) {
   const [form] = Form.useForm();
