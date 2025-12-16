@@ -1,67 +1,70 @@
-import React, { useEffect } from "react";
-import { Form, Input, Button, DatePicker, message } from "antd";
+import React, { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { Form, Input, InputNumber, DatePicker, Button, message, Card } from "antd";
 import dayjs from "dayjs";
 import api from "../api/api";
 
-export default function EditarEvento({ evento, onClose, onUpdated }) {
+export default function EditarEvento() {
+  const { id } = useParams();
+  const navigate = useNavigate();
   const [form] = Form.useForm();
+  const [loading, setLoading] = useState(false);
+
+  async function loadEvento() {
+    try {
+      const { data } = await api.get(`/eventos/${id}`);
+      form.setFieldsValue({
+        ...data,
+        data: data.data ? dayjs(data.data) : null
+      });
+    } catch {
+      message.error("Erro ao carregar evento");
+    }
+  }
+
+  async function onSubmit(values) {
+    try {
+      setLoading(true);
+      await api.put(`/eventos/${id}`, {
+        ...values,
+        data: values.data.toISOString()
+      });
+      message.success("Evento atualizado com sucesso");
+      navigate(`/eventos/${id}`);
+    } catch {
+      message.error("Erro ao atualizar evento");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
-    if (evento) {
-      form.setFieldsValue({
-        nome: evento.nome,
-        local: evento.local,
-        data: evento.data ? dayjs(evento.data) : null,
-      });
-    }
-  }, [evento, form]);
-
-  const onFinish = async (values) => {
-    try {
-      await api.put(`/eventos/${evento._id}`, {
-        ...values,
-        data: values.data.format("YYYY-MM-DD"),
-      });
-
-      message.success("Evento atualizado com sucesso!");
-      onUpdated();
-      onClose();
-    } catch (err) {
-      message.error("Erro ao atualizar evento");
-    }
-  };
-
-  if (!evento) return null;
+    loadEvento();
+  }, [id]);
 
   return (
-    <Form layout="vertical" form={form} onFinish={onFinish}>
-      <Form.Item
-        name="nome"
-        label="Nome do evento"
-        rules={[{ required: true }]}
-      >
-        <Input />
-      </Form.Item>
+    <Card title="Editar Evento">
+      <Form layout="vertical" form={form} onFinish={onSubmit}>
+        <Form.Item name="nome" label="Nome" rules={[{ required: true }]}>
+          <Input />
+        </Form.Item>
 
-      <Form.Item
-        name="local"
-        label="Local"
-        rules={[{ required: true }]}
-      >
-        <Input />
-      </Form.Item>
+        <Form.Item name="local" label="Local" rules={[{ required: true }]}>
+          <Input />
+        </Form.Item>
 
-      <Form.Item
-        name="data"
-        label="Data"
-        rules={[{ required: true }]}
-      >
-        <DatePicker format="DD/MM/YYYY" style={{ width: "100%" }} />
-      </Form.Item>
+        <Form.Item name="capacidade" label="Capacidade" rules={[{ required: true }]}>
+          <InputNumber style={{ width: "100%" }} />
+        </Form.Item>
 
-      <Button type="primary" htmlType="submit" block>
-        Salvar alterações
-      </Button>
-    </Form>
+        <Form.Item name="data" label="Data" rules={[{ required: true }]}>
+          <DatePicker style={{ width: "100%" }} />
+        </Form.Item>
+
+        <Button type="primary" htmlType="submit" loading={loading}>
+          Salvar Alterações
+        </Button>
+      </Form>
+    </Card>
   );
 }
