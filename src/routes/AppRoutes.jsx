@@ -13,6 +13,7 @@ import Configuracoes from "../pages/Configuracoes";
 import PrivateRoute from "../auth/PrivateRoute";
 import AdminRoute from "../auth/AdminRoute";
 import Administradores from "../pages/Administradores";
+import EventoDetalhe from "../pages/EventoDetalhe"; // 👈 novo
 
 export default function AppRoutes() {
   return (
@@ -23,11 +24,12 @@ export default function AppRoutes() {
       <Route path="/" element={<PrivateRoute><MainLayout /></PrivateRoute>}>
         <Route index element={<Dashboard />} />
         <Route path="eventos" element={<Eventos />} />
+        <Route path="eventos/:id" element={<EventoDetalhe />} /> {/* 👈 ESSENCIAL */}
         <Route path="participantes" element={<AdminRoute><Participantes /></AdminRoute>} />
         <Route path="ingressos" element={<AdminRoute><Ingressos /></AdminRoute>} />
         <Route path="comprar" element={<ComprarIngresso />} />
         <Route path="relatorios" element={<AdminRoute><Relatorios /></AdminRoute>} />
-        <Route path="configuracoes" element={<Configuracoes/>} /> {/* make sure import name */}
+        <Route path="configuracoes" element={<Configuracoes />} />
         <Route path="admins" element={<Administradores />} />
       </Route>
 
