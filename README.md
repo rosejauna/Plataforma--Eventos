@@ -143,27 +143,15 @@ O projeto contempla as seguintes funcionalidades:
 
 ## 🧠 Modelagem dos Dados
 
-### Evento
-- id  
-- nome  
-- data  
-- descrição  
+### 📌 Diagrama de Classes
 
-### Participante
-- id  
-- nome  
-- email  
-- imagem  
+O diagrama de classes abaixo representa o modelo conceitual utilizado no projeto, instalado como base para o Backend e para o consumo no FrontEnd.
 
-### Ingresso
-- id  
-- tipo  
-- valor  
+<img width="784" height="1364" alt="Plataforma eventos - Plant" src="https://github.com/user-attachments/assets/1cfbed57-5e3b-453d-a7d0-00726e8f2875" />
 
-### Usuário
-- id  
-- nome  
-- email  
+---
+
+O diagrama foi modelado utilizando PlantUML
 
 ---
 
