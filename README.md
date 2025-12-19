@@ -54,14 +54,11 @@ Aplicação **FrontEnd** desenvolvida em **ReactJS** para gerenciamento de **eve
 
 O projeto contempla as seguintes funcionalidades:
 
-- ✅ Cadastro de eventos  
-- ✅ Listagem de eventos  
-- ✅ Cadastro de participantes  
-- ✅ Listagem de participantes  
-- ✅ Cadastro de ingressos  
-- ✅ Listagem de ingressos  
-- ✅ Autenticação de usuários  
-- ✅ Upload de imagens  
+- ✅ CRUD participantes   
+- ✅ CRUD eventos 
+- ✅ CRUD ingressos
+- ✅ Autenticação de usuários
+- ✅ Relatório
 - ✅ Integração FrontEnd ↔ BackEnd via API REST  
 
 ---
